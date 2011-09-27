@@ -1,0 +1,59 @@
+Brutelock automatic locking agent 
+
+This agent provides both real-time protection against bruteforce/dictionary attacks as well as grabs updates 
+from the Brutelock subscription service (Subscription Key required).
+
+
+System Requirements
+
+Currently Brutelock runs on most POSIX compliant systems.
+
+The Brutelock locking agent requires the following libraries:
+ * libxml2
+ * sqlite3
+ * libcurl
+
+Installation
+
+Install from source
+There are just a few steps to install the Brutelock agent:
+   1. Download Brutelock agent from http://www.brutelock.com/downloads/ and save to /usr/local/
+   2. cd /usr/local/
+   3. tar -xjvf brutelock-version_number.tar.bz2
+   4. cd /usr/local/brutelock-version_number
+   5. configure: ./configure
+   6. make
+   7. make install
+   8. Edit the new configuration file (/usr/local/brutelock/conf/brutelock.conf) with your subscription key.
+   9. Ensure the correct ssh logfile is set in the Brutelock configuration file.  
+      Some suggestions are: "/var/log/secure" for RedHat based systems and "/var/log/auth.log" for Debian based systems.
+  10. Add any IP's to the conf/whitelist file (each on separate lines) for any IP's that Brutelock should never lock out.
+  11. Add a separate chain to iptables:
+
+      /sbin/iptables -N Brutelock-Firewall-INPUT
+      /sbin/iptables -I INPUT -j Brutelock-Firewall-INPUT
+
+  12. Start Brutelock daemon:
+
+      /usr/local/brutelock/bin/brutelockd
+
+  13. Sit back and watch the number of failed login attempts drastically diminish from your logs.
+
+  14. Brutelock includes a check script, brutelock_check.sh that can be setup to run via Cront to ensure the Brutelock 
+      daemon is running.  It is suggested to run this every 15-30 minutes, or whatever you desire.
+
+      crontab -e
+
+      */30 * * * *   /usr/local/brutelock/scripts/brutelock_check.sh > /dev/null 2>&1
+
+      *  *  *  *  *  command to be executed
+      -  -  -  -  -
+      |  |  |  |  |
+      |  |  |  |  +----- day of week (0 - 6) (Sunday=0)
+      |  |  |  +------- month (1 - 12)
+      |  |  +--------- day of month (1 - 31)
+      |  +----------- hour (0 - 23)
+      +------------- min (0 - 59)
+      
+
+Don't forget to get your subscription key to make full use of the Brutelock service!  Visit http://www.brutelock.com/service/ to learn more.

@@ -1,0 +1,65 @@
+#!/bin/sh
+
+pidfile=/var/run/brutelock.pid
+
+do_start() {
+    echo " * Starting brutelock";
+    /usr/local/brutelock/bin/brutelockd
+    if [ $? -ne 0 ]; then
+        echo "failed";
+        exit 1;
+    fi;
+    echo "done";
+}
+
+do_stop() {
+    echo " * Stopping brutelock";
+    if [ ! -f $pidfile ]; then
+        echo $pidfile does not exist;
+        echo failed;
+        exit 1;
+    fi;
+    kill `cat $pidfile`;
+    echo "done";
+}
+
+case $1 in
+    start)
+        do_start;
+    ;;
+
+    stop)
+        do_stop;
+    ;;
+
+    restart)
+        do_stop;
+        do_start;
+    ;;
+
+    status)
+        if [ -f $pidfile ]; then
+            pid=`cat $pidfile`;
+            # Do the grep as a cheap tail or -1 from the wc
+            running=`ps p $pid | grep $pid | wc -l`;
+            if [ "$running" = "0" ]; then
+                echo "$pidfile exists but the program does not seem to be running";
+            else
+                echo "Running";
+            fi;
+        else
+            running=`ps axo fname | grep bruteloc | wc -l`;
+            if [ "$running" != "0" ]; then
+                echo "$pidfile missing but program seems to be running";
+            else
+                echo "Not running";
+            fi;
+        fi;
+    ;;
+
+    *)
+        echo "Usage: brutelock {start|stop|restart|status}";
+    ;;
+esac;
+
+exit 0;
